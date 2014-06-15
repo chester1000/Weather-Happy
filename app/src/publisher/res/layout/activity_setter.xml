@@ -43,6 +43,10 @@
 
               android:horizontalSpacing="2dp"
 
+              android:drawSelectorOnTop="false"
+              android:choiceMode="singleChoice"
+              android:listSelector="@drawable/grid_selector"
+
               android:stretchMode="columnWidth"
 
               android:numColumns="3" />

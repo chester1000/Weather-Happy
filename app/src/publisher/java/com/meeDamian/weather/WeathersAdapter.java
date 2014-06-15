@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.parse.FindCallback;
 import com.parse.GetDataCallback;
@@ -64,6 +63,12 @@ public class WeathersAdapter extends BaseAdapter {
 		getItem(position).getParseFile("image").getDataInBackground(callback);
 	}
 
+	public void selectItem(final int position, final OnItemSelected callback) {
+		if( getItem(position)!=null ) {
+			callback.onSelect( getItemName(position), getItemDesc(position) );
+		}
+	}
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view;
@@ -78,8 +83,6 @@ public class WeathersAdapter extends BaseAdapter {
 			}
 		}
 
-		((TextView) view.findViewById(R.id.title)).setText(getItemName(position));
-
 		final ImageView image = (ImageView) view.findViewById(R.id.image);
 		getItemPicture(position, new GetDataCallback() {
 			@Override
@@ -89,5 +92,9 @@ public class WeathersAdapter extends BaseAdapter {
 		});
 
 		return view;
+	}
+
+	public interface OnItemSelected {
+		void onSelect(String title, String description);
 	}
 }
