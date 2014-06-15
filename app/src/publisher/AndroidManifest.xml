@@ -1,16 +1,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.meeDamian.weather">
+          package="com.meeDamian.weather">
 
     <application>
-
         <activity
             android:name=".SetterActivity"
             android:label="@string/title_activity_setter"
             android:theme="@android:style/Theme.Holo.Light"
-            android:parentActivityName=".MyActivity" >
+            android:windowSoftInputMode="stateHidden"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MyActivity">
+
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MyActivity" />
+
         </activity>
 
     </application>

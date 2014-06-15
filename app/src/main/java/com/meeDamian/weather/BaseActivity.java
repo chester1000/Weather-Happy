@@ -16,6 +16,7 @@ import com.parse.ParseQuery;
 
 public abstract class BaseActivity extends Activity {
 
+	protected String currentWeatherId;
 	private String title;
 	private String desc;
 
@@ -48,6 +49,7 @@ public abstract class BaseActivity extends Activity {
 
 			    ParseObject baseWeather = weatherObject.getParseObject("base");
 			    if( baseWeather!=null ) {
+				    currentWeatherId = baseWeather.getObjectId();
 
 				    setTitle( baseWeather.getString("defaultTitle") );
 				    setDescription( baseWeather.getString("defaultDescription") );
