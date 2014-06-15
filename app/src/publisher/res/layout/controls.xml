@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ImageButton xmlns:android="http://schemas.android.com/apk/res/android"
+
+             android:id="@+id/launchSettings"
+
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+
+             android:layout_margin="15dp"
+
+             android:background="@android:color/transparent"
+
+             android:contentDescription="@string/set_weather_icon_cd"
+
+             android:layout_alignParentBottom="true"
+             android:layout_alignParentRight="true"
+
+             android:src="@drawable/ic_action_settings" />

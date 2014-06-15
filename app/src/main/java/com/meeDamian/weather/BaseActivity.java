@@ -1,7 +1,6 @@
 package com.meeDamian.weather;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -15,7 +14,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 
-public class MyActivity extends Activity {
+public abstract class BaseActivity extends Activity {
 
 	private String title;
 	private String desc;
@@ -32,6 +31,8 @@ public class MyActivity extends Activity {
 	    iconView = (ImageView) findViewById(R.id.weatherIcon);
 	    titleView = (TextView) findViewById(R.id.weatherTitle);
 	    descriptionView = (TextView) findViewById(R.id.weatherDescription);
+
+	    handleControls();
 
 	    Parse.initialize(this, "dMeWN03ARR2f0OuFaytujYpdbjnTqRXpw8k1DRdN", "vOlFqHHbrNaW4urMuPT9jOQKcZYVsTWLjl91tobF");
 
@@ -73,7 +74,5 @@ public class MyActivity extends Activity {
 		return val;
 	}
 
-	public static class ControlsFragment extends Fragment {
-
-	}
+	abstract void handleControls();
 }
