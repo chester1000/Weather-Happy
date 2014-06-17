@@ -12,9 +12,8 @@ public class MyActivity extends BaseActivity {
 			settingsLauncher.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-
 				Intent i = new Intent(getApplicationContext(), SetterActivity.class);
-				i.putExtra("weatherId", currentWeatherId);
+				i.putExtra("baseId", baseWeatherId);
 				startActivity(i);
 				}
 			});

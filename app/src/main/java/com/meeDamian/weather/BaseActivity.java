@@ -1,24 +1,15 @@
 package com.meeDamian.weather;
 
 import android.app.Activity;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.parse.GetCallback;
-import com.parse.GetDataCallback;
-import com.parse.Parse;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
-
 
 public abstract class BaseActivity extends Activity {
 
-	protected String currentWeatherId;
-	private String title;
-	private String desc;
+	protected String baseWeatherId;
 
 	private ImageView iconView;
 	private TextView titleView;
@@ -35,51 +26,30 @@ public abstract class BaseActivity extends Activity {
 
 	    handleControls();
 
-	    Parse.initialize(this, "dMeWN03ARR2f0OuFaytujYpdbjnTqRXpw8k1DRdN", "vOlFqHHbrNaW4urMuPT9jOQKcZYVsTWLjl91tobF");
+	    ParseHelper.getInstance(this);
     }
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		ParseQuery<ParseObject> query = ParseQuery.getQuery("CurrentWeather");
-		query.include("base");
-		query.orderByDescending("createdAt");
-		query.getFirstInBackground(new GetCallback<ParseObject>() {
+		ParseHelper.getCurrentWeather(null, new ParseHelper.OnCurrentWeather() {
 			@Override
-			public void done(ParseObject weatherObject, ParseException e) {
-			if( e==null && (currentWeatherId==null || !weatherObject.getObjectId().equals(currentWeatherId)) ) {
-
-				title = desc = null;
-				setTitle( weatherObject.getString("title") );
-				setDescription( weatherObject.getString("description") );
-
-				ParseObject baseWeather = weatherObject.getParseObject("base");
-				if( baseWeather!=null ) {
-					currentWeatherId = baseWeather.getObjectId();
-
-					setTitle( baseWeather.getString("defaultTitle") );
-					setDescription( baseWeather.getString("defaultDescription") );
-
-					baseWeather.getParseFile("image").getDataInBackground(new GetDataCallback() {
-						@Override
-						public void done(byte[] bytes, ParseException e) {
-						if( e==null ) iconView.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-						}
-					});
-				}
-			}
+			public void onDataAvailable(String weatherId, String baseId, String title, String desc, Bitmap image) {
+			baseWeatherId = baseId;
+			iconView.setImageBitmap( image );
+			setTitle(title);
+			setDescription(desc);
 			}
 		});
 	}
 
 	private String setTitle(String val) {
-		if( title==null && val!=null && !val.isEmpty() ) titleView.setText(title = val);
+		if( titleView!=null && val!=null ) titleView.setText(val);
 		return val;
 	}
 
 	private String setDescription(String val) {
-		if( desc==null && val!=null && !val.isEmpty() ) descriptionView.setText(desc = val);
+		if( descriptionView!=null && val!=null ) descriptionView.setText(val);
 		return val;
 	}
 

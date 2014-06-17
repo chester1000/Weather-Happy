@@ -1,10 +1,13 @@
 package com.meeDamian.weather;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,18 +16,15 @@ import android.widget.EditText;
 import android.widget.GridView;
 
 import com.micromobs.android.floatlabel.FloatLabelEditText;
-import com.parse.GetCallback;
-import com.parse.GetDataCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.parse.ParseQuery;
 
-public class SetterActivity extends Activity implements WeathersAdapter.OnStateChanged {
+public class SetterActivity extends Activity {
 
 	private ActionBar ab;
 	private WeathersAdapter wa;
 
-	private String currentWeatherId;
+	private String baseWeatherId;
 
 	private GridView weathers;
 	private MenuItem saveButton;
@@ -32,9 +32,9 @@ public class SetterActivity extends Activity implements WeathersAdapter.OnStateC
 	private EditText titleView;
 	private EditText descView;
 
-	private boolean unsavedChanges = false;
 	private int currentSelection = -1;
 
+	@SuppressLint("AppCompatMethod")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -47,30 +47,44 @@ public class SetterActivity extends Activity implements WeathersAdapter.OnStateC
 
 		Bundle extras = getIntent().getExtras();
 		if( extras!=null ) {
-
-			currentWeatherId = extras.getString("weatherId");
-
-			ParseQuery.getQuery("Weather").getInBackground(currentWeatherId, new GetCallback<ParseObject>() {
+			baseWeatherId = extras.getString("baseId");
+			ParseHelper.getCurrentWeather(null, new ParseHelper.OnCurrentWeather() {
 				@Override
-				public void done(ParseObject currentWeather, ParseException e) {
-				if( e==null ) {
-					currentWeather
-						.getParseFile("image")
-						.getDataInBackground(new GetDataCallback() {
-							@Override
-							public void done(byte[] bytes, ParseException e) {
-							ab.setIcon(new BitmapDrawable(getResources(), BitmapFactory.decodeByteArray(bytes, 0, bytes.length)));
-							}
-						});
-				}
+				public void onDataAvailable(String weatherId, String baseWeatherId, String title, String desc, Bitmap image) {
+				ab.setIcon(new BitmapDrawable(getResources(), image));
+				setName(title);
+				setDesc(desc);
+
+				TextWatcher tw = new TextWatcher() {
+					@Override
+					public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+					@Override
+					public void onTextChanged(CharSequence s, int start, int before, int count) {
+						acknowledgeChanges();
+					}
+
+					@Override
+					public void afterTextChanged(Editable s) { }
+				};
+
+				titleView.addTextChangedListener(tw);
+				descView.addTextChangedListener(tw);
+
+				if( saveButton!=null ) saveButton.setVisible(true);
 				}
 			});
 		}
 
-
 		weathers = (GridView) findViewById(R.id.weathersList);
-		weathers.setAdapter(wa = new WeathersAdapter(this, currentWeatherId));
-		wa.registerOnLoadCallback(this);
+		wa = new WeathersAdapter(this, baseWeatherId, new WeathersAdapter.OnWeathersReady() {
+			@Override
+			public void onPositionFound(int position) {
+				checkImage(position);
+			}
+		});
+		weathers.setAdapter(wa);
+
 
 		weathers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
@@ -100,12 +114,6 @@ public class SetterActivity extends Activity implements WeathersAdapter.OnStateC
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
-
-	}
-
-	public void onAllItemsLoaded(int position, String title, String desc) {
-		if( saveButton!=null ) saveButton.setVisible(true);
-		updateView(position, title, desc);
 	}
 
 	private EditText getEditText(int id) {
@@ -113,18 +121,23 @@ public class SetterActivity extends Activity implements WeathersAdapter.OnStateC
 		return floLab!=null ? floLab.getEditText() : null;
 	}
 
-	private void setText(EditText et, String val) {
-		if( et!=null && val!=null ) et.setText(val);
+	private void checkImage(int position) {
+		currentSelection = position;
+		weathers.setItemChecked(position, true);
+		weathers.smoothScrollToPosition(position);
+	}
+
+	private void setName(String title) {
+		if( titleView!=null ) titleView.setText( title!=null ? title : "" );
+	}
+	private void setDesc(String desc) {
+		if( descView!=null ) descView.setText( desc!=null ? desc : "" );
 	}
 
 	private void updateView(int position, String title, String desc) {
-		currentSelection = position;
-
-		weathers.setItemChecked(position, true);
-		weathers.smoothScrollToPosition(position);
-
-		setText( titleView, title );
-		setText( descView, desc );
+		checkImage( position );
+		setName( title );
+		setDesc( desc );
 	}
 
 	private void updateWeather() {
@@ -151,7 +164,6 @@ public class SetterActivity extends Activity implements WeathersAdapter.OnStateC
 	}
 
 	private void acknowledgeChanges() {
-		unsavedChanges = true;
 		saveButton.setEnabled(true);
 	}
 
