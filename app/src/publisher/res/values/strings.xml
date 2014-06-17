@@ -3,6 +3,7 @@
 
     <string name="set_weather_icon_cd">Weather Icon</string>
 
+    <string name="action_save">Save</string>
     <string name="set_weather_title_label">Weather Name</string>
     <string name="set_weather_description_label">Description</string>
 </resources>

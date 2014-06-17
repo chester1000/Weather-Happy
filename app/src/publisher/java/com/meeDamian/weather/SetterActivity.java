@@ -19,13 +19,19 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
-public class SetterActivity extends Activity {
+public class SetterActivity extends Activity implements WeathersAdapter.OnStateChanged {
 
 	private ActionBar ab;
 	private WeathersAdapter wa;
 
+	private String currentWeatherId;
+
+	private GridView weathers;
 	private EditText titleView;
 	private EditText descView;
+	private MenuItem saveButton;
+
+	private boolean unsavedChanges = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +45,8 @@ public class SetterActivity extends Activity {
 
 		Bundle extras = getIntent().getExtras();
 		if( extras!=null ) {
-			String currentWeatherId = extras.getString("weatherId");
+
+			currentWeatherId = extras.getString("weatherId");
 
 			ParseQuery.getQuery("Weather").getInBackground(currentWeatherId, new GetCallback<ParseObject>() {
 				@Override
@@ -58,23 +65,20 @@ public class SetterActivity extends Activity {
 			});
 		}
 
-		final GridView weathers = (GridView) findViewById(R.id.weathersList);
-		weathers.setAdapter(wa = new WeathersAdapter(this));
+
+		weathers = (GridView) findViewById(R.id.weathersList);
+		weathers.setAdapter(wa = new WeathersAdapter(this, currentWeatherId));
+		wa.registerOnLoadCallback(this);
 
 		weathers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			view.setSelected(true);
-
-			if( wa!=null ) {
-				wa.selectItem(position, new WeathersAdapter.OnItemSelected() {
-					@Override
-					public void onSelect(String title, String description) {
-					if( title!=null && titleView!=null ) titleView.setText(title);
-					if( description!=null && descView!=null ) descView.setText(description);
-					}
-				});
-			}
+			updateView(
+				position,
+				wa.getItemName(position),
+				wa.getItemDesc(position)
+			);
+			acknowledgeChanges();
 			}
 		});
 	}
@@ -83,18 +87,42 @@ public class SetterActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.setter, menu);
+		saveButton = menu.findItem(R.id.action_save);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		return id==R.id.action_settings || super.onOptionsItemSelected(item);
+		return id==R.id.action_save || super.onOptionsItemSelected(item);
 
+	}
+
+	public void onAllItemsLoaded(int position, String title, String desc) {
+		if( saveButton!=null ) saveButton.setVisible(true);
+		updateView(position, title, desc);
 	}
 
 	private EditText getEditText(int id) {
 		FloatLabelEditText floLab = (FloatLabelEditText) findViewById(id);
 		return floLab!=null ? floLab.getEditText() : null;
 	}
+
+	private void setText(EditText et, String val) {
+		if( et!=null && val!=null ) et.setText(val);
+	}
+
+	private void updateView(int position, String title, String desc) {
+		weathers.setItemChecked(position, true);
+		weathers.smoothScrollToPosition(position);
+
+		setText( titleView, title );
+		setText( descView, desc );
+	}
+
+	private void acknowledgeChanges() {
+		unsavedChanges = true;
+		saveButton.setEnabled(true);
+	}
+
 }

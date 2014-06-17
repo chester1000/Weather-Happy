@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.GetDataCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -18,22 +19,34 @@ import java.util.List;
 
 public class WeathersAdapter extends BaseAdapter {
 
-	private Context mContext;
 	private List<ParseObject> weathers;
 	private LayoutInflater inflater;
 
-	public WeathersAdapter(Context c) {
-		mContext = c;
+	private boolean loaded = false;
+	private OnStateChanged callback;
+	private String weatherId;
+	private ParseQuery<ParseObject> weatherQuery;
 
-		inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	public WeathersAdapter(Context c, String currentWeatherId) {
+		weatherId = currentWeatherId;
 
-		ParseQuery.getQuery("Weather").findInBackground(new FindCallback<ParseObject>() {
+		inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		weatherQuery = ParseQuery.getQuery("Weather");
+		weatherQuery.findInBackground(new FindCallback<ParseObject>() {
 			@Override
 			public void done(List<ParseObject> parseObjects, ParseException e) {
+			loaded = true;
 			weathers = parseObjects;
 			notifyDataSetChanged();
+			satisfyCallback();
 			}
 		});
+	}
+
+	public void registerOnLoadCallback(OnStateChanged callback) {
+		this.callback = callback;
+		if( loaded ) satisfyCallback();
 	}
 
 	@Override
@@ -63,12 +76,6 @@ public class WeathersAdapter extends BaseAdapter {
 		getItem(position).getParseFile("image").getDataInBackground(callback);
 	}
 
-	public void selectItem(final int position, final OnItemSelected callback) {
-		if( getItem(position)!=null ) {
-			callback.onSelect( getItemName(position), getItemDesc(position) );
-		}
-	}
-
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view;
@@ -94,7 +101,34 @@ public class WeathersAdapter extends BaseAdapter {
 		return view;
 	}
 
-	public interface OnItemSelected {
-		void onSelect(String title, String description);
+	private void satisfyCallback() {
+		if( callback!=null ) {
+			weatherQuery.getInBackground(weatherId, new GetCallback<ParseObject>() {
+				@Override
+				public void done(ParseObject parseObject, ParseException e) {
+
+					// this is stupid and ugly, but quick to write :(
+					int position = -1;
+					for(int i=0; i<weathers.size(); i++) {
+						if( weathers.get(i).getObjectId().equals(weatherId) ) {
+							position = i;
+							break;
+						}
+					}
+
+					callback.onAllItemsLoaded(
+						position,
+						parseObject.getString("defaultTitle"),
+						parseObject.getString("defaultDescription")
+					);
+					callback = null;
+				}
+			});
+
+		}
+	}
+
+	public interface OnStateChanged {
+		public void onAllItemsLoaded(int position, String title, String desc);
 	}
 }

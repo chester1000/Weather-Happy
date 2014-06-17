@@ -42,10 +42,9 @@
               android:layout_above="@id/customTitle"
 
               android:horizontalSpacing="2dp"
+              android:minHeight="30dp"
 
-              android:drawSelectorOnTop="false"
               android:choiceMode="singleChoice"
-              android:listSelector="@drawable/grid_selector"
 
               android:stretchMode="columnWidth"
 
