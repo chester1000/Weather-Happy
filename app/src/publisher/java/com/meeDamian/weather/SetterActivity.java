@@ -27,11 +27,13 @@ public class SetterActivity extends Activity implements WeathersAdapter.OnStateC
 	private String currentWeatherId;
 
 	private GridView weathers;
-	private EditText titleView;
-	private EditText descView;
 	private MenuItem saveButton;
 
+	private EditText titleView;
+	private EditText descView;
+
 	private boolean unsavedChanges = false;
+	private int currentSelection = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -93,8 +95,11 @@ public class SetterActivity extends Activity implements WeathersAdapter.OnStateC
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		int id = item.getItemId();
-		return id==R.id.action_save || super.onOptionsItemSelected(item);
+		if( item.getItemId()==R.id.action_save ) {
+			updateWeather();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 
 	}
 
@@ -113,11 +118,36 @@ public class SetterActivity extends Activity implements WeathersAdapter.OnStateC
 	}
 
 	private void updateView(int position, String title, String desc) {
+		currentSelection = position;
+
 		weathers.setItemChecked(position, true);
 		weathers.smoothScrollToPosition(position);
 
 		setText( titleView, title );
 		setText( descView, desc );
+	}
+
+	private void updateWeather() {
+		ParseObject updatedWeather = new ParseObject("CurrentWeather");
+
+		ParseObject baseWeather = wa.getItem(currentSelection);
+		baseWeather.increment("timesUsed");
+		baseWeather.saveInBackground();
+
+		updatedWeather.put("base", wa.getItem(currentSelection));
+
+		if( !titleView.getText().toString().equals(baseWeather.getString("defaultTitle")) ) {
+			updatedWeather.put("title", titleView.getText().toString());
+		}
+
+		if( !descView.getText().toString().equals(baseWeather.getString("defaultDescription")) ) {
+			updatedWeather.put("description", descView.getText().toString());
+		}
+
+		try {
+			updatedWeather.save();
+		} catch(ParseException ignored) {}
+		finish();
 	}
 
 	private void acknowledgeChanges() {

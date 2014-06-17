@@ -11,26 +11,34 @@
 
                 tools:context=".MyActivity">
 
+    <TextView android:id="@+id/weatherTitle"
+
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_centerInParent="true"
+
+              android:textSize="25sp" />
+
     <ImageView android:id="@+id/weatherIcon"
 
                android:layout_height="wrap_content"
                android:layout_width="wrap_content"
                android:layout_centerHorizontal="true"
+               android:layout_above="@id/weatherTitle"
 
                android:contentDescription="@string/weather_icon_cd" />
 
-    <TextView android:id="@+id/weatherTitle"
+    <TextView android:id="@+id/weatherDescription"
 
-              android:layout_width="wrap_content"
+              android:layout_width="match_parent"
               android:layout_height="wrap_content"
 
-              android:textSize="25sp"
-              android:layout_centerHorizontal="true"
-              android:layout_below="@id/weatherIcon" />
+              android:layout_margin="10dp"
+              android:lineSpacingMultiplier="1.4"
+              android:gravity="center_horizontal"
 
-    <TextView android:id="@+id/weatherDescription"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content" />
+              android:textSize="18sp"
+              android:layout_below="@id/weatherTitle" />
 
     <include android:id="@+id/controls"
              layout="@layout/controls" />

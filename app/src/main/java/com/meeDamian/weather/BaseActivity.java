@@ -36,35 +36,42 @@ public abstract class BaseActivity extends Activity {
 	    handleControls();
 
 	    Parse.initialize(this, "dMeWN03ARR2f0OuFaytujYpdbjnTqRXpw8k1DRdN", "vOlFqHHbrNaW4urMuPT9jOQKcZYVsTWLjl91tobF");
-
-	    ParseQuery<ParseObject> query = ParseQuery.getQuery("CurrentWeather");
-	    query.include("base");
-	    query.getFirstInBackground(new GetCallback<ParseObject>() {
-		    @Override
-		    public void done(ParseObject weatherObject, ParseException e) {
-		    if( e==null ) {
-
-			    setTitle( weatherObject.getString("title") );
-			    setDescription( weatherObject.getString("description") );
-
-			    ParseObject baseWeather = weatherObject.getParseObject("base");
-			    if( baseWeather!=null ) {
-				    currentWeatherId = baseWeather.getObjectId();
-
-				    setTitle( baseWeather.getString("defaultTitle") );
-				    setDescription( baseWeather.getString("defaultDescription") );
-
-				    baseWeather.getParseFile("image").getDataInBackground(new GetDataCallback() {
-					    @Override
-					    public void done(byte[] bytes, ParseException e) {
-					    if( e==null ) iconView.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-				    }
-			    });
-			    }
-		    }
-		    }
-	    });
     }
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("CurrentWeather");
+		query.include("base");
+		query.orderByDescending("createdAt");
+		query.getFirstInBackground(new GetCallback<ParseObject>() {
+			@Override
+			public void done(ParseObject weatherObject, ParseException e) {
+			if( e==null && (currentWeatherId==null || !weatherObject.getObjectId().equals(currentWeatherId)) ) {
+
+				title = desc = null;
+				setTitle( weatherObject.getString("title") );
+				setDescription( weatherObject.getString("description") );
+
+				ParseObject baseWeather = weatherObject.getParseObject("base");
+				if( baseWeather!=null ) {
+					currentWeatherId = baseWeather.getObjectId();
+
+					setTitle( baseWeather.getString("defaultTitle") );
+					setDescription( baseWeather.getString("defaultDescription") );
+
+					baseWeather.getParseFile("image").getDataInBackground(new GetDataCallback() {
+						@Override
+						public void done(byte[] bytes, ParseException e) {
+						if( e==null ) iconView.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+						}
+					});
+				}
+			}
+			}
+		});
+	}
 
 	private String setTitle(String val) {
 		if( title==null && val!=null && !val.isEmpty() ) titleView.setText(title = val);

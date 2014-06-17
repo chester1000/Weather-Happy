@@ -33,6 +33,7 @@ public class WeathersAdapter extends BaseAdapter {
 		inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		weatherQuery = ParseQuery.getQuery("Weather");
+		weatherQuery.orderByDescending("timesUsed");
 		weatherQuery.findInBackground(new FindCallback<ParseObject>() {
 			@Override
 			public void done(List<ParseObject> parseObjects, ParseException e) {
