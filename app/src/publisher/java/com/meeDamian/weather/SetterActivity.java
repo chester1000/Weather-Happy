@@ -4,7 +4,10 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -51,7 +54,9 @@ public class SetterActivity extends Activity {
 			ParseHelper.getCurrentWeather(null, new ParseHelper.OnCurrentWeather() {
 				@Override
 				public void onDataAvailable(String weatherId, String baseWeatherId, String title, String desc, Bitmap image) {
-				ab.setIcon(new BitmapDrawable(getResources(), image));
+				Drawable d = new BitmapDrawable(getResources(), image);
+				d.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
+				ab.setIcon(d);
 				setName(title);
 				setDesc(desc);
 

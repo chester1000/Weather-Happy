@@ -2,6 +2,8 @@ package com.meeDamian.weather;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,6 +81,7 @@ public class WeathersAdapter extends BaseAdapter {
 			@Override
 			public void done(byte[] bytes, ParseException e) {
 			image.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+			image.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
 			}
 		});
 

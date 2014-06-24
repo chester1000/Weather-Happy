@@ -2,6 +2,8 @@ package com.meeDamian.weather;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -36,7 +38,8 @@ public abstract class BaseActivity extends Activity {
 			@Override
 			public void onDataAvailable(String weatherId, String baseId, String title, String desc, Bitmap image) {
 			baseWeatherId = baseId;
-			iconView.setImageBitmap( image );
+			iconView.setImageBitmap(image);
+			iconView.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
 			setTitle(title);
 			setDescription(desc);
 			}

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.GetDataCallback;
 import com.parse.Parse;
@@ -50,6 +51,15 @@ public class ParseHelper {
 			}
 			}
 		});
+	}
+
+	// NOTE: used in publisher
+	public static ParseQuery<ParseObject> getAllWeathers(FindCallback<ParseObject> callback) {
+		ParseQuery<ParseObject> weatherQuery = ParseQuery.getQuery("Weather");
+		weatherQuery.orderByDescending("timesUsed");
+		weatherQuery.findInBackground(callback);
+
+		return weatherQuery;
 	}
 
 	public static ParseHelper getInstance(Context c) {
